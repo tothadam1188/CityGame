@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h> 
+#include <conio.h>
 
 #define COLUMNCOUNT 40
 #define ROWCOUNT    20
@@ -17,6 +18,10 @@ int DifficultyChecker(string difficulty);
 
 int GamePopulator(char Base[][COLUMNCOUNT], int Population, int CityLevel);
 
+void SaveFileAgent(char(Base)[ROWCOUNT][COLUMNCOUNT]);
+
+void PrintGameMenu();
+
 int main()
 {
     srand(time(NULL));
@@ -26,6 +31,7 @@ int main()
     int Population = 10;
     int CityLevel = 1;
     int HouseholdCount = 0;
+    char PlayerInput;
     char Base[ROWCOUNT][COLUMNCOUNT];
     for (int i = 0; i < ROWCOUNT; i++)
     {
@@ -44,10 +50,13 @@ int main()
     cin >> Difficulty;
     Money*=DifficultyChecker(Difficulty);
     Population *= DifficultyChecker(Difficulty);
-    cout << "\033[2J\033[1;1H";
+    
+    system("CLS");
     HouseholdCount=GamePopulator(Base, Population, CityLevel);
     PrintBoard(Base,Money,Population);
-
+    SaveFileAgent(Base);
+    PrintGameMenu();
+    cin >> PlayerInput;
     return 0;
 }
 
@@ -96,4 +105,25 @@ int GamePopulator(char (Base)[ROWCOUNT][COLUMNCOUNT], int Population, int CityLe
         Base[locx][locy] = 'A';
     }
     return HouseholdCount;
+};
+
+void SaveFileAgent(char(Base)[ROWCOUNT][COLUMNCOUNT])
+{
+    ofstream outfile("save1.txt");
+    for (int i = 0; i < ROWCOUNT; i++)
+    {
+        for (int j = 1; j < COLUMNCOUNT; j++)
+        {
+            outfile << Base[i][j];
+        }
+        outfile << endl;
+    }
+};
+
+void PrintGameMenu()
+{
+    cout << "b)   Build mode\t";
+    cout << "\ts)   Statistics" << endl;
+    cout << "m)   Management ";
+    cout << "\ti)   Inspect tile" << endl;
 };
