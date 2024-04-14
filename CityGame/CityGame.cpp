@@ -6,13 +6,14 @@
 #include <stdlib.h>
 #include <time.h> 
 #include <conio.h>
+#include <algorithm>
 
 #define COLUMNCOUNT 40
 #define ROWCOUNT    20
 
 using namespace std;
 
-void PrintBoard(char Base[][COLUMNCOUNT], int Money, int Population);
+void PrintBoard(char Base[][COLUMNCOUNT], int Money, int Population, vector<int> CurrentDate, int CityHappiness);
 
 int DifficultyChecker(string difficulty);
 
@@ -22,6 +23,8 @@ void SaveFileAgent(char(Base)[ROWCOUNT][COLUMNCOUNT]);
 
 void PrintGameMenu();
 
+void DateChanger(vector<int> &Date);
+
 int main()
 {
     srand(time(NULL));
@@ -29,10 +32,13 @@ int main()
     string Difficulty ="";
     int Money=10000;
     int Population = 10;
+    int NewPopulation = 0;
     int CityLevel = 1;
     int HouseholdCount = 0;
-    char PlayerInput;
+    string PlayerInput;
     char Base[ROWCOUNT][COLUMNCOUNT];
+    vector<int> CurrentDate = { 2000,1,0 };
+    int OverallCityHappiness = 100;
     for (int i = 0; i < ROWCOUNT; i++)
     {
         for (int j = 0; j < COLUMNCOUNT; j++)
@@ -50,19 +56,24 @@ int main()
     cin >> Difficulty;
     Money*=DifficultyChecker(Difficulty);
     Population *= DifficultyChecker(Difficulty);
-    
-    system("CLS");
-    HouseholdCount=GamePopulator(Base, Population, CityLevel);
-    PrintBoard(Base,Money,Population);
-    SaveFileAgent(Base);
-    PrintGameMenu();
-    cin >> PlayerInput;
+    GamePopulator(Base, Population, CityLevel);
+    while (PlayerInput != "x")
+    {
+        DateChanger(CurrentDate);
+        GamePopulator(Base, NewPopulation, CityLevel);
+        system("CLS");
+        PrintBoard(Base, Money, Population, CurrentDate, OverallCityHappiness);
+        SaveFileAgent(Base);
+        PrintGameMenu();
+        cin >> PlayerInput;
+    }
+
     return 0;
 }
 
-void PrintBoard(char Base[][COLUMNCOUNT], int Money, int Population)
+void PrintBoard(char Base[][COLUMNCOUNT], int Money, int Population, vector<int> CurrentDate, int CityHappiness)
 {
-    cout << "Money: $" << Money << "\tPopulation: " << Population << endl;
+    cout << "Money: $" << Money << "      Population: " << Population << "      Date: "<< CurrentDate[0]<<"."<<CurrentDate[1]<<"."<<CurrentDate[2]<<"      Happiness: "<<CityHappiness<<"%"<<endl;
     for (int i = 0; i < ROWCOUNT; i++)
     {
         for (int j = 0; j < COLUMNCOUNT; j++)
@@ -127,3 +138,35 @@ void PrintGameMenu()
     cout << "m)   Management ";
     cout << "\ti)   Inspect tile" << endl;
 };
+
+void DateChanger(vector<int> &Date)
+{
+    bool IsLeapYear = false;
+    if (Date[0] % 400 == 0 || (Date[0] % 100 != 100 && Date[0] % 4 == 1)) IsLeapYear = true;
+    vector<int> Months30 = { 4,6,9,11 };
+    vector<int> Months31 = { 1,3,5,7,10,12 };
+    if (find(Months30.begin(), Months30.end(), Date[1]) != Months30.end() && Date[2] + 1 == 31)
+    {
+        if (Date[1]+1 == 13) Date[1] = 1;
+        else
+        {
+            Date[1]++;
+            Date[2]=1;
+        }
+    }
+    else if (find(Months31.begin(), Months31.end(), Date[1]) != Months31.end() && Date[2] + 1 == 32)
+    {
+        if (Date[1]+1 == 13) Date[1] = 1;
+        else
+        {
+            Date[1]++;
+            Date[2]=1;
+        }
+    }
+    else if ((Date[1] == 2 && Date[2] + 1 == 29 && IsLeapYear == false) || Date[1] == 2 && Date[2] + 1 == 30 && IsLeapYear == true)
+    {
+        Date[1]++;
+        Date[2] = 1;
+    }
+    else Date[2]++;
+}
